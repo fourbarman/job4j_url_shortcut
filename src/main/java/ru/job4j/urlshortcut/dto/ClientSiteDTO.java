@@ -1,13 +1,13 @@
 package ru.job4j.urlshortcut.dto;
 
-public class UserSiteDTO {
+public class ClientSiteDTO {
     String site;
 
-    public UserSiteDTO(String site) {
+    public ClientSiteDTO(String site) {
         this.site = site;
     }
 
-    public UserSiteDTO() {
+    public ClientSiteDTO() {
     }
 
     public String getSite() {

@@ -3,6 +3,7 @@ package ru.job4j.urlshortcut.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
-public class User {
+public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -25,6 +26,7 @@ public class User {
     private String site;
     @OneToMany
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private List<Shortcut> shortcuts = new ArrayList<>();
 
     public void addShortcut(Shortcut shortcut) {
