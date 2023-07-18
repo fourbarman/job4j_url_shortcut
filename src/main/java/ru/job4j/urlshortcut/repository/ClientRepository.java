@@ -10,7 +10,5 @@ public interface ClientRepository extends CrudRepository<Client, Long> {
     @NonNull
     List<Client> findAll();
 
-    Client findUserByUsername(String username);
-
-    Client findClientByUsername(String clientName);
+    Client findClientByUsername(String username);
 }

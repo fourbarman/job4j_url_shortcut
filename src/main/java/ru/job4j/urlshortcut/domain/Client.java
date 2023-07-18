@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "clients")
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class Client {
     @Column(name = "site")
     private String site;
     @OneToMany
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "client_id")
     @ToString.Exclude
     private List<Shortcut> shortcuts = new ArrayList<>();
 

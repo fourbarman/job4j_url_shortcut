@@ -21,6 +21,6 @@ public class Shortcut {
     private String code;
     @Column(name = "total")
     private long total;
-    @Column(name = "user_id")
-    private long userId;
+    @Column(name = "client_id")
+    private long clientId;
 }
