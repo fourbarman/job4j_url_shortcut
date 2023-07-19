@@ -39,4 +39,8 @@ public class ClientService implements UserDetailsService {
     public Client update(Client client) {
         return this.clientRepository.save(client);
     }
+
+    public Client findClientByUsername(String username) {
+        return this.clientRepository.findClientByUsername(username);
+    }
 }

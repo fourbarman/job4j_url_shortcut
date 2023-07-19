@@ -24,7 +24,7 @@ public class Client {
     private String password;
     @Column(name = "site")
     private String site;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "client_id")
     @ToString.Exclude
     private List<Shortcut> shortcuts = new ArrayList<>();

@@ -8,12 +8,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.urlshortcut.domain.Client;
 import ru.job4j.urlshortcut.domain.Shortcut;
-import ru.job4j.urlshortcut.dto.ClientRegisterDTO;
-import ru.job4j.urlshortcut.dto.ClientSiteDTO;
-import ru.job4j.urlshortcut.dto.ShortcutUrlDTO;
+import ru.job4j.urlshortcut.dto.*;
 import ru.job4j.urlshortcut.service.ShortcutService;
 import ru.job4j.urlshortcut.service.ClientService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -41,26 +40,37 @@ public class ClientController {
     }
 
     @PostMapping(value = "/convert", consumes = "application/json")
-    public ResponseEntity<ShortcutUrlDTO> convert(@RequestBody ShortcutUrlDTO shortcutUrlDTO) {
+    public ResponseEntity<ShortcutCodeDTO> convert(@RequestBody ShortcutUrlDTO shortcutUrlDTO) {
 
         String shortcut = this.generateRandom(10);
-        Client client = (Client)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Client client = this.clientService.findClientByUsername(username);
+
         client.addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.getId()));
         if (this.clientService.update(client) == null) {
-            return new ResponseEntity<>(new ShortcutUrlDTO(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new ShortcutCodeDTO(), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(shortcut, HttpStatus.OK);
+        return new ResponseEntity<>(new ShortcutCodeDTO(shortcut), HttpStatus.OK);
     }
 
     @GetMapping(value = "/redirect/{code}")
-    public ResponseEntity<Shortcut> redirect(@PathVariable String code) {
-        return new ResponseEntity<>(this.shortcutService.findShortcutByCode(code), HttpStatus.OK);
+    public ResponseEntity<ShortcutUrlDTO> redirect(@PathVariable String code) {
+        Shortcut sh = this.shortcutService.findShortcutByCode(code);
+        return new ResponseEntity<>(new ShortcutUrlDTO(sh.getUrl()), HttpStatus.FOUND);
     }
 
     @GetMapping("/statistic")
-    public ResponseEntity<List<Client>> statistic() {
-        List<Client> clients = this.clientService.getAll();
-        return new ResponseEntity<>(clients, HttpStatus.OK);
+    public ResponseEntity<List<ShortcutStatisticDTO>> statistic() {
+        List<ShortcutStatisticDTO> shortcuts = new ArrayList<>();
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Client client = this.clientService.findClientByUsername(username);
+        shortcuts.add(new ShortcutStatisticDTO(client.getSite(), 0));
+        client.getShortcuts()
+                .forEach(x -> shortcuts.add(new ShortcutStatisticDTO(x.getUrl(), x.getTotal())));
+
+        return new ResponseEntity<>(shortcuts, HttpStatus.OK);
     }
     /**
      * Generate random string with given length.
