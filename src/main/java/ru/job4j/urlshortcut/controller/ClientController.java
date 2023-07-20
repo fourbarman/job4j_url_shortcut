@@ -11,9 +11,14 @@ import ru.job4j.urlshortcut.domain.Shortcut;
 import ru.job4j.urlshortcut.dto.*;
 import ru.job4j.urlshortcut.service.ShortcutService;
 import ru.job4j.urlshortcut.service.ClientService;
+import ru.job4j.urlshortcut.util.ClientNotFoundException;
+import ru.job4j.urlshortcut.util.ShortcutNotFoundException;
+import ru.job4j.urlshortcut.util.SiteRegisterException;
+import ru.job4j.urlshortcut.util.UrlConvertException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -25,53 +30,61 @@ public class ClientController {
 
     @PostMapping(value = "/registration", consumes = "application/json")
     public ResponseEntity<ClientRegisterDTO> register(@RequestBody ClientSiteDTO clientSiteDTO) {
-        Client client = new Client();
-        String pass = this.generateRandom(8);
         String username = this.generateRandom(6);
-        client.setId(0L);
-        client.setUsername(username);
-        client.setPassword(encoder.encode(pass));
-        client.setSite(clientSiteDTO.getSite());
-        System.out.println("Client pass:" + client.getPassword());
-        if (this.clientService.save(client) == null) {
-            return new ResponseEntity<>(new ClientRegisterDTO(false, "", ""), HttpStatus.NOT_FOUND);
+        String pass = this.generateRandom(8);
+        Optional<Client> client = this.clientService.save(
+                new Client(0L, username, encoder.encode(pass), clientSiteDTO.getSite(), new ArrayList<>())
+        );
+        if (client.isEmpty()) {
+            throw new SiteRegisterException("Site already exists");
         }
         return new ResponseEntity<>(new ClientRegisterDTO(true, username, pass), HttpStatus.OK);
     }
 
     @PostMapping(value = "/convert", consumes = "application/json")
     public ResponseEntity<ShortcutCodeDTO> convert(@RequestBody ShortcutUrlDTO shortcutUrlDTO) {
-
         String shortcut = this.generateRandom(10);
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Client client = this.clientService.findClientByUsername(username);
+        Optional<Client> client = this.clientService.findClientByUsername(username);
 
-        client.addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.getId()));
-        if (this.clientService.update(client) == null) {
-            return new ResponseEntity<>(new ShortcutCodeDTO(), HttpStatus.CONFLICT);
+        if (client.isEmpty()) {
+            throw new ClientNotFoundException("Client was not found");
         }
+        client.get().addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.get().getId()));
+        Optional<Client> updatedClient = this.clientService.save(client.get());
+
+        if (updatedClient.isEmpty()) {
+            throw new UrlConvertException("Url already exists");
+        }
+
         return new ResponseEntity<>(new ShortcutCodeDTO(shortcut), HttpStatus.OK);
     }
 
     @GetMapping(value = "/redirect/{code}")
     public ResponseEntity<ShortcutUrlDTO> redirect(@PathVariable String code) {
-        Shortcut sh = this.shortcutService.findShortcutByCode(code);
-        return new ResponseEntity<>(new ShortcutUrlDTO(sh.getUrl()), HttpStatus.FOUND);
+        Optional<Shortcut> sh = this.shortcutService.findShortcutByCode(code);
+        if (sh.isEmpty()) {
+            throw new ShortcutNotFoundException("URL with given code was not found");
+        }
+        return new ResponseEntity<>(new ShortcutUrlDTO(sh.get().getUrl()), HttpStatus.FOUND);
     }
 
     @GetMapping("/statistic")
     public ResponseEntity<List<ShortcutStatisticDTO>> statistic() {
         List<ShortcutStatisticDTO> shortcuts = new ArrayList<>();
-
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Client client = this.clientService.findClientByUsername(username);
-        shortcuts.add(new ShortcutStatisticDTO(client.getSite(), 0));
-        client.getShortcuts()
+        Optional<Client> client = this.clientService.findClientByUsername(username);
+        if (client.isEmpty()) {
+            throw new ClientNotFoundException("Client not found");
+        }
+        shortcuts.add(new ShortcutStatisticDTO(client.get().getSite(), 0));
+        client.get().getShortcuts()
                 .forEach(x -> shortcuts.add(new ShortcutStatisticDTO(x.getUrl(), x.getTotal())));
 
         return new ResponseEntity<>(shortcuts, HttpStatus.OK);
     }
+
     /**
      * Generate random string with given length.
      * Random symbols from {A-Z, a-z, 0-9}
@@ -88,5 +101,4 @@ public class ClientController {
                 .toString();
         return str;
     }
-
 }

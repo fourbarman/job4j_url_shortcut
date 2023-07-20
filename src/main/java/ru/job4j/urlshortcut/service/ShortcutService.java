@@ -6,17 +6,19 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.job4j.urlshortcut.domain.Shortcut;
 import ru.job4j.urlshortcut.repository.ShortcutRepository;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class ShortcutService {
     private final ShortcutRepository shortcutRepository;
 
     @Transactional
-    public Shortcut findShortcutByCode(String code) {
+    public Optional<Shortcut> findShortcutByCode(String code) {
         Shortcut sh = this.shortcutRepository.findByCode(code);
         if (sh != null) {
             this.shortcutRepository.incrementTotal(sh.getId());
         }
-        return this.shortcutRepository.findByCode(code);
+        return Optional.ofNullable(this.shortcutRepository.findByCode(code));
     }
 }

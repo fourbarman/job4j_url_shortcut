@@ -1,6 +1,7 @@
 package ru.job4j.urlshortcut.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,22 +10,23 @@ import org.springframework.stereotype.Service;
 import ru.job4j.urlshortcut.domain.Client;
 import ru.job4j.urlshortcut.repository.ClientRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ClientService implements UserDetailsService {
     private final ClientRepository clientRepository;
 
-    public Client save(Client client) {
-        this.clientRepository.save(client);
-        return client;
-    }
-
-    public List<Client> getAll() {
-        return this.clientRepository.findAll();
+    public Optional<Client> save(Client client) {
+        Optional<Client> opt = Optional.empty();
+        try {
+            opt = Optional.of(this.clientRepository.save(client));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return opt;
     }
 
     @Override
@@ -36,11 +38,7 @@ public class ClientService implements UserDetailsService {
         return new User(client.getUsername(), client.getPassword(), emptyList());
     }
 
-    public Client update(Client client) {
-        return this.clientRepository.save(client);
-    }
-
-    public Client findClientByUsername(String username) {
-        return this.clientRepository.findClientByUsername(username);
+    public Optional<Client> findClientByUsername(String username) {
+        return Optional.ofNullable(this.clientRepository.findClientByUsername(username));
     }
 }
