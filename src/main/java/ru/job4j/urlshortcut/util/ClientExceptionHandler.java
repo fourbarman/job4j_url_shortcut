@@ -11,18 +11,49 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+/**
+ * ClientExceptionHandler.
+ *
+ * @author fourbarman (maks.java@yandex.ru).
+ * @version %I%, %G%.
+ * @since 20.07.2023.
+ */
 @Slf4j
 @ControllerAdvice
 public class ClientExceptionHandler {
+    @ExceptionHandler(value = SiteRegisterException.class)
     public ResponseEntity<Object> handle(SiteRegisterException sce) {
-        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ApiException apiException = new ApiException(
                 sce.getMessage(),
                 ZonedDateTime.now(ZoneId.of("UTC")),
                 httpStatus
         );
         log.error(sce.getMessage(), sce);
+        return new ResponseEntity<>(apiException, httpStatus);
+    }
+
+    @ExceptionHandler(value = ShortcutNotFoundException.class)
+    public ResponseEntity<Object> handle(ShortcutNotFoundException snfe) {
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        ApiException apiException = new ApiException(
+                snfe.getMessage(),
+                ZonedDateTime.now(ZoneId.of("UTC")),
+                httpStatus
+        );
+        log.error(snfe.getMessage(), snfe);
+        return new ResponseEntity<>(apiException, httpStatus);
+    }
+
+    @ExceptionHandler(value = UrlConvertException.class)
+    public ResponseEntity<Object> handle(UrlConvertException uce) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ApiException apiException = new ApiException(
+                uce.getMessage(),
+                ZonedDateTime.now(ZoneId.of("UTC")),
+                httpStatus
+        );
+        log.error(uce.getMessage(), uce);
         return new ResponseEntity<>(apiException, httpStatus);
     }
 

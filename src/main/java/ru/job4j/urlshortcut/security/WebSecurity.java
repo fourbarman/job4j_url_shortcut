@@ -23,7 +23,7 @@ import static ru.job4j.urlshortcut.filter.JWTAuthenticationFilter.SIGN_UP_URL;
  *
  * @author fourbarman (maks.java@yandex.ru).
  * @version %I%, %G%.
- * @since 24.05.2023.
+ * @since 24.07.2023.
  */
 @RequiredArgsConstructor
 @EnableWebSecurity

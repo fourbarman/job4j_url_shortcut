@@ -5,7 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
+/**
+ * Shortcut.
+ *
+ * @author fourbarman (maks.java@yandex.ru).
+ * @version %I%, %G%.
+ * @since 18.07.2023.
+ */
 @Data
 @Entity
 @AllArgsConstructor

@@ -17,7 +17,13 @@ import java.util.ArrayList;
 import static ru.job4j.urlshortcut.filter.JWTAuthenticationFilter.HEADER_STRING;
 import static ru.job4j.urlshortcut.filter.JWTAuthenticationFilter.SECRET;
 import static ru.job4j.urlshortcut.filter.JWTAuthenticationFilter.TOKEN_PREFIX;
-
+/**
+ * JWTAuthorizationFilter.
+ *
+ * @author fourbarman (maks.java@yandex.ru).
+ * @version %I%, %G%.
+ * @since 24.07.2023.
+ */
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {

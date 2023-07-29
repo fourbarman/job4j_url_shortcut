@@ -7,7 +7,13 @@ import ru.job4j.urlshortcut.domain.Shortcut;
 import ru.job4j.urlshortcut.repository.ShortcutRepository;
 
 import java.util.Optional;
-
+/**
+ * ShortcutService.
+ *
+ * @author fourbarman (maks.java@yandex.ru).
+ * @version %I%, %G%.
+ * @since 22.07.2023.
+ */
 @Service
 @AllArgsConstructor
 public class ShortcutService {
