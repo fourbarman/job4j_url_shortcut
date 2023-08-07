@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ClientExceptionHandler {
     @ExceptionHandler(value = SiteRegisterException.class)
     public ResponseEntity<Object> handle(SiteRegisterException sce) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
         ApiException apiException = new ApiException(
                 sce.getMessage(),
                 ZonedDateTime.now(ZoneId.of("UTC")),
