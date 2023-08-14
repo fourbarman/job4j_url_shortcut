@@ -1,6 +1,9 @@
 package ru.job4j.urlshortcut.dto;
 
 import org.hibernate.validator.constraints.URL;
+
+import javax.validation.constraints.Size;
+
 /**
  * ClientSiteDTO.
  *
@@ -10,6 +13,7 @@ import org.hibernate.validator.constraints.URL;
  */
 public class ClientSiteDTO {
     @URL
+    @Size(max = 100)
     String site;
 
     public ClientSiteDTO(String site) {

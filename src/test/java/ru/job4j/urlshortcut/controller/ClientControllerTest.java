@@ -87,7 +87,7 @@ class ClientControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         ShortcutUrlDTO shortcutUrlDTO = new ShortcutUrlDTO("http://test.com/test/test");
         ShortcutCodeDTO shortcutCodeDTO = new ShortcutCodeDTO("xxxxxxxx");
-        when(clientService.convert(any())).thenReturn(shortcutCodeDTO);
+        when(clientService.convert(any(), any())).thenReturn(shortcutCodeDTO);
 
         mockMvc.perform(post("/convert")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -141,7 +141,7 @@ class ClientControllerTest {
         List<ShortcutStatisticDTO> statList = new ArrayList<>();
         statList.add(new ShortcutStatisticDTO("http://test.com/test", 10L));
         statList.add(new ShortcutStatisticDTO("http://test.com/test/test", 1L));
-        when(clientService.getStatistics()).thenReturn(statList);
+        when(clientService.getStatistics(any())).thenReturn(statList);
         mockMvc.perform(get("/statistic"))
                 .andExpect(status().isOk())
                 .andExpect(

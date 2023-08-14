@@ -3,6 +3,7 @@ package ru.job4j.urlshortcut.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.urlshortcut.domain.Shortcut;
 import ru.job4j.urlshortcut.dto.*;
@@ -51,7 +52,7 @@ public class ClientController {
      */
     @PostMapping(value = "/convert", consumes = "application/json")
     public ResponseEntity<ShortcutCodeDTO> convert(@RequestBody @Valid ShortcutUrlDTO shortcutUrlDTO) {
-        ShortcutCodeDTO code = this.clientService.convert(shortcutUrlDTO);
+        ShortcutCodeDTO code = this.clientService.convert(shortcutUrlDTO, getCurrentUserUsername());
         return new ResponseEntity<>(code, HttpStatus.OK);
     }
 
@@ -77,7 +78,11 @@ public class ClientController {
      */
     @GetMapping("/statistic")
     public ResponseEntity<List<ShortcutStatisticDTO>> statistic() {
-        List<ShortcutStatisticDTO> statList = this.clientService.getStatistics();
+        List<ShortcutStatisticDTO> statList = this.clientService.getStatistics(getCurrentUserUsername());
         return new ResponseEntity<>(statList, HttpStatus.OK);
+    }
+
+    private String getCurrentUserUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }

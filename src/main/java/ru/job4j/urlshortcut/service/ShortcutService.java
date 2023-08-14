@@ -21,10 +21,8 @@ public class ShortcutService {
 
     @Transactional
     public Optional<Shortcut> findShortcutByCode(String code) {
-        Shortcut sh = this.shortcutRepository.findByCode(code);
-        if (sh != null) {
-            this.shortcutRepository.incrementTotal(sh.getId());
-        }
-        return Optional.ofNullable(this.shortcutRepository.findByCode(code));
+        Optional<Shortcut> sh = this.shortcutRepository.findByCode(code);
+        sh.ifPresent(shortcut -> this.shortcutRepository.incrementTotal(shortcut.getId()));
+        return this.shortcutRepository.findByCode(code);
     }
 }

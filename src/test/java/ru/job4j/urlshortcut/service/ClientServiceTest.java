@@ -22,6 +22,7 @@ import ru.job4j.urlshortcut.util.UrlConvertException;
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,10 +82,10 @@ class ClientServiceTest {
         ShortcutUrlDTO shortcut = new ShortcutUrlDTO(validUrl);
         Client client = new Client(10L, username, pass, site, new ArrayList<>());
 
-        when(clientRepository.findClientByUsername(any())).thenReturn(client);
+        when(clientRepository.findClientByUsername(any())).thenReturn(Optional.of(client));
         when(clientRepository.save(any())).thenReturn(client);
 
-        ShortcutCodeDTO code = clientService.convert(shortcut);
+        ShortcutCodeDTO code = clientService.convert(shortcut, client.getUsername());
         assertEquals(10, code.getCode().length());
         assertTrue(code.getCode().matches("[a-zA-Z0-9]+"));
     }
@@ -92,10 +93,10 @@ class ClientServiceTest {
     @Test
     void whenConvertAndUserWasNotFoundThenThrowClientNotFoundException() {
         ShortcutUrlDTO shortcut = new ShortcutUrlDTO(validUrl);
-        when(clientRepository.findClientByUsername(any())).thenReturn(null);
+        when(clientRepository.findClientByUsername(any())).thenReturn(Optional.empty());
         ClientNotFoundException exception = Assertions.assertThrows(
                 ClientNotFoundException.class, () ->
-                        clientService.convert(shortcut)
+                        clientService.convert(shortcut, any())
         );
         Assertions.assertEquals("Client was not found", exception.getMessage());
     }
@@ -105,11 +106,11 @@ class ClientServiceTest {
         ShortcutUrlDTO shortcut = new ShortcutUrlDTO(notValidUrl);
         Client client = new Client(10L, username, pass, site, new ArrayList<>());
 
-        when(clientRepository.findClientByUsername(any())).thenReturn(client);
+        when(clientRepository.findClientByUsername(any())).thenReturn(Optional.of(client));
 
         UrlConvertException exception = Assertions.assertThrows(
                 UrlConvertException.class, () ->
-                        clientService.convert(shortcut)
+                        clientService.convert(shortcut, client.getUsername())
         );
         Assertions.assertEquals("URL should start with " + site, exception.getMessage());
     }
@@ -119,12 +120,12 @@ class ClientServiceTest {
         ShortcutUrlDTO shortcut = new ShortcutUrlDTO(validUrl);
         Client client = new Client(10L, username, pass, site, new ArrayList<>());
 
-        when(clientRepository.findClientByUsername(any())).thenReturn(client);
+        when(clientRepository.findClientByUsername(any())).thenReturn(Optional.of(client));
         when(clientRepository.save(any())).thenReturn(null);
 
         UrlConvertException exception = Assertions.assertThrows(
                 UrlConvertException.class, () ->
-                        clientService.convert(shortcut)
+                        clientService.convert(shortcut, client.getUsername())
         );
         Assertions.assertEquals("Url already exists", exception.getMessage());
     }
@@ -135,18 +136,18 @@ class ClientServiceTest {
         Shortcut shortcut = new Shortcut(0L, validUrl, "xxxxxxxxxx", 0, 10);
         Client client = new Client(10L, username, pass, site, List.of(shortcut));
 
-        when(clientRepository.findClientByUsername(any())).thenReturn(client);
+        when(clientRepository.findClientByUsername(any())).thenReturn(Optional.of(client));
 
-        List<ShortcutStatisticDTO> statList = clientService.getStatistics();
+        List<ShortcutStatisticDTO> statList = clientService.getStatistics(client.getUsername());
         assertEquals(2, statList.size());
     }
 
     @Test
     void whenGetStatisticsAndUserIsNotFoundThenThrowClientNotFoundException() {
-        when(clientRepository.findClientByUsername(any())).thenReturn(null);
+        when(clientRepository.findClientByUsername(any())).thenReturn(Optional.empty());
         ClientNotFoundException exception = Assertions.assertThrows(
                 ClientNotFoundException.class, () ->
-                        clientService.getStatistics()
+                        clientService.getStatistics(any())
         );
         Assertions.assertEquals("Client not found", exception.getMessage());
     }
@@ -154,8 +155,8 @@ class ClientServiceTest {
     @Test
     void whenLoadUserByUsernameAndSuccess() {
         when(clientRepository.findClientByUsername(username))
-                .thenReturn(
-                        new Client(0L, username, pass, site, new ArrayList<>()));
+                .thenReturn(Optional.of(
+                        new Client(0L, username, pass, site, new ArrayList<>())));
         UserDetails userDetails = clientService.loadUserByUsername(username);
         assertEquals(userDetails.getUsername(), username);
         assertEquals(userDetails.getPassword(), pass);
@@ -164,7 +165,7 @@ class ClientServiceTest {
     @Test
     void whenLoadUserByUsernameAndNotFoundThenTrowUserNotFoundException() {
         when(clientRepository.findClientByUsername(username))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         UsernameNotFoundException exception = Assertions.assertThrows(
                 UsernameNotFoundException.class, () ->
                         clientService.loadUserByUsername(username)

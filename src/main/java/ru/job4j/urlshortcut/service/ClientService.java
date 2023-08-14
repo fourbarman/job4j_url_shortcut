@@ -2,7 +2,6 @@ package ru.job4j.urlshortcut.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +13,7 @@ import ru.job4j.urlshortcut.domain.Shortcut;
 import ru.job4j.urlshortcut.dto.*;
 import ru.job4j.urlshortcut.repository.ClientRepository;
 import ru.job4j.urlshortcut.util.ClientNotFoundException;
+import ru.job4j.urlshortcut.util.GenerateRandomInt;
 import ru.job4j.urlshortcut.util.UrlConvertException;
 
 import java.util.*;
@@ -31,8 +31,10 @@ import static java.util.Collections.emptyList;
 @Service
 @AllArgsConstructor
 public class ClientService implements UserDetailsService {
+
     private final ClientRepository clientRepository;
     private final BCryptPasswordEncoder encoder;
+    private final GenerateRandomInt generateRandomInt;
 
     /**
      * Save Client to DB with random generated username, password.
@@ -45,16 +47,16 @@ public class ClientService implements UserDetailsService {
      * @return clientRegisterDTO.
      */
     public ClientRegisterDTO save(ClientSiteDTO clientSiteDTO) {
-        String username = this.generateRandom(6);
-        String pass = this.generateRandom(8);
+        String username = generateRandomInt.generateUsername();
+        String pass = generateRandomInt.generatePassword();
         ClientRegisterDTO clientRegisterDTO = new ClientRegisterDTO(false, null, null);
-        Optional<Client> opt = Optional.empty();
+        Client opt = null;
         try {
-            opt = Optional.of(this.clientRepository.save(new Client(0L, username, encoder.encode(pass), clientSiteDTO.getSite(), new ArrayList<>())));
+            opt = this.clientRepository.save(new Client(0L, username, encoder.encode(pass), clientSiteDTO.getSite(), new ArrayList<>()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        if (opt.isPresent()) {
+        if (opt != null) {
             clientRegisterDTO.setRegistration(true);
             clientRegisterDTO.setUsername(username);
             clientRegisterDTO.setPassword(pass);
@@ -75,10 +77,9 @@ public class ClientService implements UserDetailsService {
      * @param shortcutUrlDTO ShortcutUrlDTO.
      * @return ShortcutCodeDTO.
      */
-    public ShortcutCodeDTO convert(ShortcutUrlDTO shortcutUrlDTO) {
-        String shortcut = this.generateRandom(10);
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Client> client = Optional.ofNullable(this.clientRepository.findClientByUsername(username));
+    public ShortcutCodeDTO convert(ShortcutUrlDTO shortcutUrlDTO, String username) {
+        String shortcut = generateRandomInt.generateCode();
+        Optional<Client> client = this.clientRepository.findClientByUsername(username);
         if (client.isEmpty()) {
             throw new ClientNotFoundException("Client was not found");
         }
@@ -87,13 +88,13 @@ public class ClientService implements UserDetailsService {
             throw new UrlConvertException("URL should start with " + clientSite);
         }
         client.get().addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.get().getId()));
-        Optional<Client> updatedClient = Optional.empty();
+        Client updatedClient = null;
         try {
-            updatedClient = Optional.of(this.clientRepository.save(client.get()));
+            updatedClient = this.clientRepository.save(client.get());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        if (updatedClient.isEmpty()) {
+        if (updatedClient == null) {
             throw new UrlConvertException("Url already exists");
         }
         return new ShortcutCodeDTO(shortcut);
@@ -107,10 +108,9 @@ public class ClientService implements UserDetailsService {
      *
      * @return ShortcutStatisticDTO list.
      */
-    public List<ShortcutStatisticDTO> getStatistics() {
+    public List<ShortcutStatisticDTO> getStatistics(String username) {
         List<ShortcutStatisticDTO> statList = new ArrayList<>();
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Client> client = Optional.ofNullable(this.clientRepository.findClientByUsername(username));
+        Optional<Client> client = this.clientRepository.findClientByUsername(username);
         if (client.isEmpty()) {
             throw new ClientNotFoundException("Client not found");
         }
@@ -130,27 +130,10 @@ public class ClientService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Client client = this.clientRepository.findClientByUsername(username);
-        if (client == null) {
+        Optional<Client> client = this.clientRepository.findClientByUsername(username);
+        if (client.isEmpty()) {
             throw new UsernameNotFoundException("Client not found");
         }
-        return new User(client.getUsername(), client.getPassword(), emptyList());
-    }
-
-    /**
-     * Generate random string with given length.
-     * Random symbols from {A-Z, a-z, 0-9}
-     *
-     * @param length Requested length.
-     * @return Generated string.
-     */
-    private String generateRandom(int length) {
-        Random rand = new Random();
-        String str = rand.ints(48, 123)
-                .filter(num -> (num < 58 || num > 64) && (num < 91 || num > 96))
-                .limit(length)
-                .mapToObj(c -> (char) c).collect(StringBuffer::new, StringBuffer::append, StringBuffer::append)
-                .toString();
-        return str;
+        return new User(client.get().getUsername(), client.get().getPassword(), emptyList());
     }
 }
