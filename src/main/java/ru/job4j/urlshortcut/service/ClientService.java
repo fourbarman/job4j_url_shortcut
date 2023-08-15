@@ -78,7 +78,6 @@ public class ClientService implements UserDetailsService {
      * @return ShortcutCodeDTO.
      */
     public ShortcutCodeDTO convert(ShortcutUrlDTO shortcutUrlDTO, String username) {
-        String shortcut = generateRandomInt.generateCode();
         Optional<Client> client = this.clientRepository.findClientByUsername(username);
         if (client.isEmpty()) {
             throw new ClientNotFoundException("Client was not found");
@@ -87,6 +86,7 @@ public class ClientService implements UserDetailsService {
         if (!shortcutUrlDTO.getUrl().startsWith(clientSite)) {
             throw new UrlConvertException("URL should start with " + clientSite);
         }
+        String shortcut = generateRandomInt.generateCode();
         client.get().addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.get().getId()));
         Client updatedClient = null;
         try {
