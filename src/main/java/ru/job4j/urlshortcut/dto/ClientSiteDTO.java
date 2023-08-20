@@ -1,5 +1,8 @@
 package ru.job4j.urlshortcut.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.Size;
@@ -11,23 +14,11 @@ import javax.validation.constraints.Size;
  * @version %I%, %G%.
  * @since 22.07.2023.
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ClientSiteDTO {
     @URL
     @Size(max = 100)
     String site;
-
-    public ClientSiteDTO(String site) {
-        this.site = site;
-    }
-
-    public ClientSiteDTO() {
-    }
-
-    public String getSite() {
-        return site;
-    }
-
-    public void setSite(String site) {
-        this.site = site;
-    }
 }

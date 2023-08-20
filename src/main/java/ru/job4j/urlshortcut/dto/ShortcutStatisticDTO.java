@@ -1,4 +1,9 @@
 package ru.job4j.urlshortcut.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * ShortcutStatisticDTO.
  *
@@ -6,31 +11,10 @@ package ru.job4j.urlshortcut.dto;
  * @version %I%, %G%.
  * @since 22.07.2023.
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShortcutStatisticDTO {
     private String url;
     private long total;
-
-    public ShortcutStatisticDTO(String url, long total) {
-        this.url = url;
-        this.total = total;
-    }
-
-    public ShortcutStatisticDTO() {
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public long getTotal() {
-        return total;
-    }
-
-    public void setTotal(long total) {
-        this.total = total;
-    }
 }
