@@ -17,6 +17,7 @@ import ru.job4j.urlshortcut.util.GenerateRandomInt;
 import ru.job4j.urlshortcut.util.UrlConvertException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
@@ -70,9 +71,8 @@ public class ClientService implements UserDetailsService {
      * 2. Get Client's site name.
      * 3. If Client was not found in DB then throw ClientNotFoundException.
      * 3.1. If given URL doesn't start with Client's site name, then throw UrlConvertException.
-     * 3.2. If Client was found and URL starts with Client's site name then add Shortcut to Client.
-     * 4. Save Client to DB.
-     * 4.1. If URL already exists in DB then trow UrlConvertException.
+     * 3.2 If Client doesn't contain URL then generate code and save Client.
+     * 3.3. If Client already contains URL then return its code.
      *
      * @param shortcutUrlDTO ShortcutUrlDTO.
      * @return ShortcutCodeDTO.
@@ -86,18 +86,20 @@ public class ClientService implements UserDetailsService {
         if (!shortcutUrlDTO.getUrl().startsWith(clientSite)) {
             throw new UrlConvertException("URL should start with " + clientSite);
         }
-        String shortcut = generateRandomInt.generateCode();
-        client.get().addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.get().getId()));
-        Client updatedClient = null;
-        try {
-            updatedClient = this.clientRepository.save(client.get());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        Shortcut present = null;
+        for (Shortcut sc : client.get().getShortcuts()) {
+            if (shortcutUrlDTO.getUrl().equals(sc.getUrl())) {
+                present = sc;
+            }
         }
-        if (updatedClient == null) {
-            throw new UrlConvertException("Url already exists");
+        if (present == null) {
+            String shortcut = generateRandomInt.generateCode();
+            client.get().addShortcut(new Shortcut(0L, shortcutUrlDTO.getUrl(), shortcut, 0, client.get().getId()));
+            this.clientRepository.save(client.get());
+            return new ShortcutCodeDTO(shortcut);
+        } else {
+            return new ShortcutCodeDTO(present.getCode());
         }
-        return new ShortcutCodeDTO(shortcut);
     }
 
     /**

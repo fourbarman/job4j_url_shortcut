@@ -123,23 +123,6 @@ class ClientServiceTest {
     }
 
     @Test
-    void whenConvertAndUserWasFoundAndUrlMatchesSiteNameAndUserWasNotSavedThenThrowUrlConvertException() {
-        ShortcutUrlDTO shortcut = new ShortcutUrlDTO(validUrl);
-        doReturn(Optional.of(client)).when(clientRepository).findClientByUsername(client.getUsername());
-        doReturn(null).when(clientRepository).save(client);
-
-        UrlConvertException exception = Assertions.assertThrows(
-                UrlConvertException.class, () ->
-                        clientService.convert(shortcut, client.getUsername())
-        );
-        Assertions.assertEquals("Url already exists", exception.getMessage());
-        verify(clientRepository).findClientByUsername(any(String.class));
-        verify(clientRepository).save(client);
-        verify(generateRandomInt).generateCode();
-    }
-
-
-    @Test
     void whenGetStatisticsAndUserIsFoundThenSuccess() {
         Shortcut shortcut = new Shortcut(0L, validUrl, testCode, 0, 10);
         client.addShortcut(shortcut);
