@@ -17,7 +17,6 @@ import ru.job4j.urlshortcut.util.GenerateRandomInt;
 import ru.job4j.urlshortcut.util.UrlConvertException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
