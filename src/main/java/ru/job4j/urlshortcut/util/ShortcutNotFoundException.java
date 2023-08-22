@@ -6,7 +6,7 @@ package ru.job4j.urlshortcut.util;
  * @version %I%, %G%.
  * @since 22.07.2023.
  */
-public class ShortcutNotFoundException extends RuntimeException {
+public class ShortcutNotFoundException extends Exception {
     public ShortcutNotFoundException(String message) {
         super(message);
     }

@@ -40,7 +40,7 @@ public class ClientService implements UserDetailsService {
      * Save Client to DB with random generated username, password.
      * 1. Generate random username and password.
      * 2. Save Client to DB.
-     * 3.1. If save to DB throw Exception(i.e. Constraint exception) then log exception and return registration false.
+     * 3.1. If save to DB throw Exception(i.e. Constraint exception) then return registration false.
      * 3.2. If save success then return clientRegisterDTO with generated username, password and registration true.
      *
      * @param clientSiteDTO ClientSiteDTO.
@@ -49,17 +49,13 @@ public class ClientService implements UserDetailsService {
     public ClientRegisterDTO save(ClientSiteDTO clientSiteDTO) {
         String username = generateRandomInt.generateUsername();
         String pass = generateRandomInt.generatePassword();
-        ClientRegisterDTO clientRegisterDTO = new ClientRegisterDTO(false, null, null);
-        Client opt = null;
+        ClientRegisterDTO clientRegisterDTO = new ClientRegisterDTO(true, username, pass);
         try {
-            opt = this.clientRepository.save(new Client(0L, username, encoder.encode(pass), clientSiteDTO.getSite(), new ArrayList<>()));
+            this.clientRepository.save(new Client(0L, username, encoder.encode(pass), clientSiteDTO.getSite(), new ArrayList<>()));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        if (opt != null) {
-            clientRegisterDTO.setRegistration(true);
-            clientRegisterDTO.setUsername(username);
-            clientRegisterDTO.setPassword(pass);
+            clientRegisterDTO.setRegistration(false);
+            clientRegisterDTO.setUsername(null);
+            clientRegisterDTO.setPassword(null);
         }
         return clientRegisterDTO;
     }
@@ -76,7 +72,7 @@ public class ClientService implements UserDetailsService {
      * @param shortcutUrlDTO ShortcutUrlDTO.
      * @return ShortcutCodeDTO.
      */
-    public ShortcutCodeDTO convert(ShortcutUrlDTO shortcutUrlDTO, String username) {
+    public ShortcutCodeDTO convert(ShortcutUrlDTO shortcutUrlDTO, String username) throws ClientNotFoundException, UrlConvertException {
         Optional<Client> client = this.clientRepository.findClientByUsername(username);
         if (client.isEmpty()) {
             throw new ClientNotFoundException("Client was not found");
@@ -109,7 +105,7 @@ public class ClientService implements UserDetailsService {
      *
      * @return ShortcutStatisticDTO list.
      */
-    public List<ShortcutStatisticDTO> getStatistics(String username) {
+    public List<ShortcutStatisticDTO> getStatistics(String username) throws ClientNotFoundException {
         List<ShortcutStatisticDTO> statList = new ArrayList<>();
         Optional<Client> client = this.clientRepository.findClientByUsername(username);
         if (client.isEmpty()) {

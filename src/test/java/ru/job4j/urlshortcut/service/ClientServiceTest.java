@@ -86,7 +86,7 @@ class ClientServiceTest {
     }
 
     @Test
-    void whenConvertAndUserWasFoundAndUrlMatchesSiteNameAndUserSavedThenSuccess() {
+    void whenConvertAndUserWasFoundAndUrlMatchesSiteNameAndUserSavedThenSuccess() throws ClientNotFoundException, UrlConvertException {
         ShortcutUrlDTO shortcut = new ShortcutUrlDTO(validUrl);
         doReturn(Optional.of(client)).when(clientRepository).findClientByUsername(client.getUsername());
         doReturn(client).when(clientRepository).save(any());
@@ -123,7 +123,7 @@ class ClientServiceTest {
     }
 
     @Test
-    void whenGetStatisticsAndUserIsFoundThenSuccess() {
+    void whenGetStatisticsAndUserIsFoundThenSuccess() throws ClientNotFoundException {
         Shortcut shortcut = new Shortcut(0L, validUrl, testCode, 0, 10);
         client.addShortcut(shortcut);
         doReturn(Optional.of(client)).when(clientRepository).findClientByUsername(client.getUsername());

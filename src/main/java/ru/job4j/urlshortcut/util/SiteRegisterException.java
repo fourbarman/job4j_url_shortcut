@@ -6,7 +6,7 @@ package ru.job4j.urlshortcut.util;
  * @version %I%, %G%.
  * @since 20.07.2023.
  */
-public class SiteRegisterException extends RuntimeException {
+public class SiteRegisterException extends Exception {
     public SiteRegisterException(String message) {
         super(message);
     }

@@ -6,7 +6,7 @@ package ru.job4j.urlshortcut.util;
  * @version %I%, %G%.
  * @since 22.07.2023.
  */
-public class UrlConvertException extends RuntimeException {
+public class UrlConvertException extends Exception {
     public UrlConvertException(String message) {
         super(message);
     }
