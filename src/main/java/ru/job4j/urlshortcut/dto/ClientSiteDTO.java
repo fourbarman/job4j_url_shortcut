@@ -1,5 +1,6 @@
 package ru.job4j.urlshortcut.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,8 +18,10 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Client URL entity")
 public class ClientSiteDTO {
     @URL
     @Size(max = 100)
+    @Schema(description = "Site URL")
     String site;
 }

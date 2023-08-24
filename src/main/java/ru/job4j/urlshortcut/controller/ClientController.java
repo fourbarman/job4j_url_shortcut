@@ -1,5 +1,8 @@
 package ru.job4j.urlshortcut.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,9 @@ import java.util.Optional;
  */
 @RestController
 @AllArgsConstructor
+@Tag(
+        name = "Client controller",
+        description = "Register URL, convert URL to shortcut, redirect URL by shortcut, statistics by shortcuts")
 public class ClientController {
     private final ClientService clientService;
     private final ShortcutService shortcutService;
@@ -37,6 +43,7 @@ public class ClientController {
      * @param clientSiteDTO ClientSiteDTO.
      * @return HttpStatus.OK if success or HttpStatus from SiteRegisterException.
      */
+    @Operation(summary = "Register URL", description = "Register URL and get random username and password")
     @PostMapping(value = "/registration", consumes = "application/json")
     public ResponseEntity<ClientRegisterDTO> register(@RequestBody @Valid ClientSiteDTO clientSiteDTO) throws SiteRegisterException {
         ClientRegisterDTO clientRegisterDTO = this.clientService.save(clientSiteDTO);
@@ -52,6 +59,7 @@ public class ClientController {
      * @param shortcutUrlDTO ShortcutUrlDTO.
      * @return HttpStatus.OK if success or HttpStatus from UrlConvertException.
      */
+    @Operation(summary = "Convert URL", description = "Convert URL to shortcut")
     @PostMapping(value = "/convert", consumes = "application/json")
     public ResponseEntity<ShortcutCodeDTO> convert(@RequestBody @Valid ShortcutUrlDTO shortcutUrlDTO) throws ClientNotFoundException, UrlConvertException {
         ShortcutCodeDTO code = this.clientService.convert(shortcutUrlDTO, getCurrentUserUsername());
@@ -64,8 +72,10 @@ public class ClientController {
      * @param code String code.
      * @return HttpStatus.FOUND if success or HttpStatus from ShortcutNotFoundException.
      */
+    @Operation(summary = "Redirect by shortcut", description = "Redirect with URL by associated shortcut")
     @GetMapping(value = "/redirect/{code}")
-    public ResponseEntity<ShortcutUrlDTO> redirect(@PathVariable String code) throws ShortcutNotFoundException {
+    public ResponseEntity<ShortcutUrlDTO> redirect(
+            @PathVariable @Parameter(description = "Shortcut") String code) throws ShortcutNotFoundException {
         Optional<Shortcut> sh = this.shortcutService.findShortcutByCode(code);
         if (sh.isEmpty()) {
             throw new ShortcutNotFoundException("URL with given code was not found");
@@ -78,6 +88,7 @@ public class ClientController {
      *
      * @return HttpStatus.OK if success or HttpStatus from ClientNotFoundException.
      */
+    @Operation(summary = "Get statistic", description = "Get statistic by registered site URL and shortcuts")
     @GetMapping("/statistic")
     public ResponseEntity<List<ShortcutStatisticDTO>> statistic() throws ClientNotFoundException {
         List<ShortcutStatisticDTO> statList = this.clientService.getStatistics(getCurrentUserUsername());

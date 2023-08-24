@@ -7,7 +7,9 @@ This project is based on [JDK 17](https://www.oracle.com/java/technologies/javas
 - [Springboot](https://spring.io/projects/spring-boot) (v. 2.7.12),
 - [Spring Data](https://spring.io/projects/spring-data) (v. 5.7.3),
 - [Lombok](https://projectlombok.org/) (v. 1.18.22),
-- [PostgreSQL](https://www.postgresql.org/).
+- [PostgreSQL](https://www.postgresql.org/) (v. 13.1),
+- [Swagger](https://springdoc.org/v1/) (v. 1.6.14),
+- [JWT](https://github.com/auth0/java-jwt) (v. 3.4.0).
 ---
 ## articles
 1. Register Your site in service and get Your UNIQUE_LOGIN and UNIQUE_PASSWORD:
